@@ -85,4 +85,30 @@ En esta sección unimos las secuencias *forward* y las *reverse* de las muestras
 ```{r}
 #
 mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
+head(mergers[[1]])
+```
+
+# Construir la tabla de secuencias
+
+```{r}
+seqtab <- makeSequenceTable(mergers)#esta función construye una tabla de secuencias, análoga a una tabla de OTU's, a partir de la lista de las muestras
+dim(seqtab)#hay un total de 194 muestras, y se tienen en total 12757 secuencias
+```
+
+# Remover quimeras
+
+```{r}
+seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)#después de quitar el ruido, se deben de quitar las quimeras que quedaron. las quimeras son secuencias que fueron unidas de manera incorrecta, se genera una tabla ya sin quimeras
+dim(seqtab.nochim)#del total de las 194 muestras, quitando las quimeras, quedan 2678 secuencias
+sum(seqtab.nochim)/sum(seqtab)#si está bien hehco, la mayoría de las secuencias deben de quedar y el valor de esta operación debe de ser cercano a uno. En este caso el valor es de 0.9987378
+```
+
+# Verificar el número de lecturas después del pipeline
+
+```{r}
+getN <- function(x) sum(getUniques(x))
+track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim))#esto permite ver la cantidad de reads y secuencias únicas con las que empezamos y cuántas se han retirado cada paso. Parece estar bien ya que no se han perdido muchos reads
+colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "nonchim")
+rownames(track) <- sample.names
+head(track)
 ```
