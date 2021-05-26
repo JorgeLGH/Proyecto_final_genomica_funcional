@@ -12,6 +12,6 @@ output:
 
 Primero, señalamos el directorio de trabajo donde se va a llevar todo a cabo.
 ```{r}
-setwd( choose.dir ()  ) #cambiar para que cada ususario pueda seleccionar el directorio de trabajo
+setwd( choose.dir ()  ) # cambiar para que cada ususario pueda seleccionar el directorio de trabajo
 ```
 
