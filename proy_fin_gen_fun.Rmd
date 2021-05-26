@@ -112,3 +112,7 @@ colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "n
 rownames(track) <- sample.names
 head(track)
 ```
+# Asignar taxonomía
+
+Para asignar las taxonomías se usan los archivos silva_nr_v132_train_set.fa.gz y RDP_LSU_fixed_train_set_v2.fa.gz
+Para la taxonomía de hongos, consultar repositorio de Github para ver cómo se obtuvo todo.
