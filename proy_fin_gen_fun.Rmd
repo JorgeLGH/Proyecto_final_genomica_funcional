@@ -23,5 +23,8 @@ El siguiente paso es definir qué secuencias son las reverse y las forward, esto
 #estas líneas dividen los 
 forward<-sort(list.files(ruta, pattern="_1.fastq", full.names = TRUE))
 reverse<-sort(list.files(ruta, pattern="_2.fastq", full.names = TRUE))
+sample.names <- sapply(strsplit(basename(forward), "_"), `[`, 1) #con esta línea tenemos los nombres de las muestras sin la clasificación de forward y reverse. Separa y selecciona según la función sapply, tomamos el primer fragmento de la separación
 ```
+# Calidad Phred
+En esta parte se usará la calidad Phred para poder realizar, mas adelante, los cortes en los reads según lo que se pueda observar con las gráficas que se basan en este índice de calidad de los reads.
 
