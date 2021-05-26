@@ -50,3 +50,24 @@ cd pro_fin_genfun/
 mkdir fastq_pro_fin_suelo
 #mover los FASTQ a la carpeta
 mv *.fastq /mnt/c/Users/fotgo/OneDrive/Documentos/R/Genomica_funcional/pro_fin_genfun/fastq_pro_fin_suelo/
+
+####################
+#para descargar el archivo de taxa para los hongos se siguen los siguientes pasos obtenidos de https://zenodo.org/record/835855#.YK4BnqhKjIU
+####################
+#Format RDP taxonomic training set for DADA2
+#1  Wrangle the RDP trainingsets and unaligned data into the downloads folder by executing this from a terminal and move the file somewhere with >30GB free
+wget https://sourceforge.net/projects/rdp-classifier/files/RDP_Classifier_TrainingData/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata.zip
+wget http://rdp.cme.msu.edu/download/current_Fungi_unaligned.fa.gz
+#2  Unzip the trainingset file and replace Us with Ts in the fasta by executing in terminal
+awk 'NR%2==0 {gsub(/[uU]/,"T"); print} NR%2==1' /mnt/c/Users/fotgo/OneDrive/Documentos/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/fungiLSU_train_012014.fa >  /mnt/c/Users/fotgo/OneDrive/Documentos/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/fungiLSU_train_012014_lsu_fixed_v2.fa
+#3  Summon the dada2 pkg
+library(dada2);packageVersion("dada2")
+#4  Transform the DADA2 formatted training fastas, in R
+path.1<-" ~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/"
+dada2:::makeTaxonomyFasta_RDP(file.path(path.1, "fungiLSU_train_012014_lsu_fixed_v2.fa"), file.path(path.1, "fungiLSU_taxid_012014.txt"),"~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDP_LSU_fixed_train_set_v2.fa",compress=FALSE)
+dada2:::makeSpeciesFasta_RDP("~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/current_Fungi_unaligned.fa", "~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/rdp_species_assignment_LSU_v2.fa", compress=FALSE)
+#5 Make the compressed DADA2 formatted training fastas in gz and zip format
+dada2:::makeTaxonomyFasta_RDP("~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/fungiLSU_train_012014_lsu_fixed_v2.fa", file.path(path.1, "fungiLSU_taxid_012014.txt"),"~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDP_LSU_fixed_train_set_v2.fa.gz",compress=TRUE)
+dada2:::makeTaxonomyFasta_RDP("~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/fungiLSU_train_012014_lsu_fixed_v2.fa", file.path(path.1, "fungiLSU_taxid_012014.txt"),"~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDP_LSU_fixed_train_set_v2.fa.zip",compress=TRUE)
+dada2:::makeSpeciesFasta_RDP("~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/current_Fungi_unaligned.fa", "~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/rdp_species_assignment_LSU_v2.fa.gz", compress=TRUE)
+dada2:::makeSpeciesFasta_RDP("~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/current_Fungi_unaligned.fa", "~/R/Genomica_funcional/pro_fin_genfun/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/RDPClassifier_fungiLSU_trainsetNo11_rawtrainingdata/rdp_species_assignment_LSU_v2.fa.zip", compress=TRUE)
