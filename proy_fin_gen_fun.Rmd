@@ -48,6 +48,19 @@ Ahora ya sigue el corte y la formación de los archivos filtrados.
 out <- filterAndTrim(forward, filtFs, reverse, filtRs, truncLen=c(200,140),
               maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE, 
               compress=TRUE, multithread=F)
+#se hizo el corte en las bases 200 y 140 respectivamente para poder incluir solo aquellas secuencias que sin duda son de buena calidad
 head(out)
 ```
+# Tasas de error
+En esta parte se usa *machine learning* con la finalidad de poder dar el parámetro de error, se van alternando estimaciones de error inferido de la muestra y la estimación de la razón de errores hasta que convergen
+```{r}
+#errF<-learnErrors(filtFs, multithread=TRUE)
+#save(errF,file="~/R/Genomica_funcional/pro_fin_genfun/errF.RData")
+#se carga el arhivo para un flujo más rápido
+load("errF.RData")
 
+#mismo proceso para los de reverse
+#errR<-learnErrors(filtRs, multithread=TRUE)
+#save(errR,file="~/R/Genomica_funcional/pro_fin_genfun/errR.RData")
+load("errR.RData")
+```
