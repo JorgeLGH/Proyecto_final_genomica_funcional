@@ -1,17 +1,27 @@
 ---
-title: "Proyecto final"
-subtitle: "Genómica Funcional"
+title: "Proyecto final Genómica Funcional"
 author: "Gómez Hernández Jorge Luis, Rojas García Luis Andrés"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: "5/28/2021"
 output: 
-    prettydoc::html_pretty:
-    theme: cayman
-    highlight: github
+  html_document: 
+    theme: cerulean
 ---
 
 
-Primero, señalamos el directorio de trabajo donde se va a llevar todo a cabo.
+Primero, señalamos el directorio de trabajo donde se va a llevar todo a cabo y cargamos la librería principal que se usará.
 ```{r}
-setwd( choose.dir ()  ) # cambiar para que cada ususario pueda seleccionar el directorio de trabajo
+setwd("~/R/Genomica_funcional/pro_fin_genfun/") #cambiar para PROPIO directorio de trabajo
+library(dada2)
+```
+Ahora se define la ruta en la cual están los archivos FASTQ que se usarán
+```{r}
+ruta<-"~/R/Genomica_funcional/pro_fin_genfun/fastq_pro_fin_suelo/" #debe de cambiarse segpun el usuario y su localización de sus archivos
+head(list.files(ruta)) #manda los nombres de todos los archivos que hay en esa ruta
+```
+El siguiente paso es definir qué secuencias son las reverse y las forward, esto porque el experimento cuenta con secuencias pareadas. En este caso particular, los archivos con *_1* son la secuencia *forward*, mientras que los archivos con *_2* son las secuencias *reverse*.
+```{r}
+#estas líneas dividen los 
+forward<-sort(list.files(ruta, pattern="_1.fastq", full.names = TRUE))
+reverse<-sort(list.files(ruta, pattern="_2.fastq", full.names = TRUE))
 ```
 
