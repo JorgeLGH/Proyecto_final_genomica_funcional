@@ -32,7 +32,7 @@ En esta parte se usará la calidad Phred para poder realizar, mas adelante, los 
 plotQualityProfile(forward[1:3])
 plotQualityProfile(reverse[1:3])
 ```
-#Filtrado y trimming de los reads
+# Filtrado y trimming de los reads
 En esta parte se hace el filtrado de los reads con los cortes arbitrarios basados con la visualización de la calidad Phred.
 ```{r}
 # Colocar los archivos en un archivo llamado filtered y que contenga los forward y reverse compresos en gz
