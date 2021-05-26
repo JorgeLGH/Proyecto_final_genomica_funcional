@@ -27,4 +27,27 @@ sample.names <- sapply(strsplit(basename(forward), "_"), `[`, 1) #con esta líne
 ```
 # Calidad Phred
 En esta parte se usará la calidad Phred para poder realizar, mas adelante, los cortes en los reads según lo que se pueda observar con las gráficas que se basan en este índice de calidad de los reads.
+```{r}
+#visualización de la calidad de Phred de las tres primeras secuencias tanto de forward como de reverse
+plotQualityProfile(forward[1:3])
+plotQualityProfile(reverse[1:3])
+```
+#Filtrado y trimming de los reads
+En esta parte se hace el filtrado de los reads con los cortes arbitrarios basados con la visualización de la calidad Phred.
+```{r}
+# Colocar los archivos en un archivo llamado filtered y que contenga los forward y reverse compresos en gz
+filtFs <- file.path(ruta, "filtered", paste0(sample.names, "_F_filt.fastq.gz"))
+filtRs <- file.path(ruta, "filtered", paste0(sample.names, "_R_filt.fastq.gz"))
+#asignamos los nombres a los archivos filtrados
+names(filtFs) <- sample.names
+names(filtRs) <- sample.names
+```
+Ahora ya sigue el corte y la formación de los archivos filtrados.
+```{r}
+#aquí se genera el archivo como tal, cada uno de los archivos "filtered" de la parte anterior ahora existe con la información obtenida aquí, ya son las secuencias filtradas con los cortes arbitrarios que se desearon.
+out <- filterAndTrim(forward, filtFs, reverse, filtRs, truncLen=c(200,140),
+              maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE, 
+              compress=TRUE, multithread=F)
+head(out)
+```
 
