@@ -63,4 +63,26 @@ load("errF.RData")
 #errR<-learnErrors(filtRs, multithread=TRUE)
 #save(errR,file="~/R/Genomica_funcional/pro_fin_genfun/errR.RData")
 load("errR.RData")
+#esta parte los puntos son las tasas de error observadas; la línea roja es la tasa de error esperada
+plotErrors(errF, nominalQ=TRUE)
+plotErrors(errR, nominalQ=TRUE)
+```
+# Inferencia de la muestra
+
+```{r}
+#testa función va a remover los errores de la secuenciación, por eso es que se calculó el error previamente, anos ayudará a describir la comunidad
+#dadaFs <- dada(filtFs, err=errF, multithread=TRUE)
+#save(dadaFs,file="~/R/Genomica_funcional/pro_fin_genfun/dadaFs.RData")
+#se guaradó y cargó el objeto para agilizar el proceso
+load("dadaFS.RData")
+#dadaRs <- dada(filtRs, err=errR, multithread=TRUE)
+#save(dadaRs,file="~/R/Genomica_funcional/pro_fin_genfun/dadaRs.RData")
+#mismo proceso que con el objeto anterior
+load("dadaRS.RData")
+```
+# Unir las secuencias *paired reads*
+En esta sección unimos las secuencias *forward* y las *reverse* de las muestras obtenidas.
+```{r}
+#
+mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
 ```
