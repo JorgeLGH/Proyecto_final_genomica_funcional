@@ -1,10 +1,12 @@
 ---
-title: "Proyecto final Genómica Funcional"
+title: "Proyecto final"
+subtitle: "Genómica Funcional"
 author: "Gómez Hernández Jorge Luis, Rojas García Luis Andrés"
-date: "5/28/2021"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
-  html_document: 
-    theme: cerulean
+    prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
 ---
 
 
