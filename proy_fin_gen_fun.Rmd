@@ -1,0 +1,15 @@
+---
+title: "Proyecto final Genómica Funcional"
+author: "Gómez Hernández Jorge Luis, Rojas García Luis Andrés"
+date: "5/28/2021"
+output: 
+  html_document: 
+    theme: cerulean
+---
+
+
+Primero, señalamos el directorio de trabajo donde se va a llevar todo a cabo.
+```{r}
+setwd("~/R/Genomica_funcional/pro_fin_genfun/") #cambiar para PROPIO directorio de trabajo
+```
+
