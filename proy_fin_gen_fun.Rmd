@@ -161,7 +161,7 @@ rownames(samdf) <- samples.out#just renames to the file names
 ```
 En este paso construimos nuesto objeto phyloseq con los datos que nos interesan.
 ```{r}
-ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), 
+ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), #genera nuestro objeto phyloseq usando los datos que le damos a la tabla
                sample_data(samdf), 
                tax_table(taxa))
 rr<-c("SRR9700969", "SRR9700912")
@@ -170,38 +170,97 @@ ps <- prune_samples(sample_names(ps) != rr, ps) # Remover los controles negativo
 
 
 ```{r}
-dna <- Biostrings::DNAStringSet(taxa_names(ps))#will take the sequence as the taxa names, and then will take thos sequences as dna strings so we don't lose info
-names(dna) <- taxa_names(ps)#the names are the sequences
-ps <- merge_phyloseq(ps, dna)#i guess it will merge the objects we created into one with the all the information
-taxa_names(ps) <- paste0("ASV", seq(ntaxa(ps)))#assigned ASV and simply numbered, those are the new taxa names
+dna <- Biostrings::DNAStringSet(taxa_names(ps))#toma las secuencias como los nombres de la taxa, luego toma esas secuencias para generarlos como dns strings 
+names(dna) <- taxa_names(ps)#los nombres de las secuencias
+ps <- merge_phyloseq(ps, dna)#une los objetos creados de phyloseq con las secuencias i 
+taxa_names(ps) <- paste0("ASV", seq(ntaxa(ps)))#asigna ASV y numera nada más, esos son los nombres ahora
 ps
-plot_richness(ps, x="Humedad")
+plot_richness(ps, x="Suelo", measures = c("Shannon","Simpson","InvSimpson"), color = "Humedad")
+plot_richness(ps, x="Suelo", measures = c("Shannon","Simpson","InvSimpson"), color = "Replica")
 ```
-
-
-
-
-```{r}
-# Transform data to proportions as appropriate for Bray-Curtis distances
-ps.prop <- transform_sample_counts(ps, function(otu) otu/sum(otu))#transforms the sample counts of a taxa abundance matrix according to a user-provided function
-ord.nmds.bray <- ordinate(ps.prop, method="NMDS", distance="bray")#Didn't really get it
-```
-
-```{r}
-plot_ordination(ps.prop, ord.nmds.bray, color="When", title="Bray NMDS")
-```
-
 
 # Gráficos de barras apiladas de abundancias
-
+En esta parte graficamos las abundancias de las bacterias en las muestras, pero no es de mucha utilidad.
 ```{r}
-top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
+top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:194]
 ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
 ps.top20 <- prune_taxa(top20, ps.top20)
-plot_bar(ps.top20, x="Day", fill="Family") + facet_wrap(~When, scales="free_x")
+plot_bar(ps.top20, x="Suelo", fill="Family") + facet_wrap(~Humedad, scales="free_x")
+```
+
+# Parte con hongos
+Pese a que la metodología usada para determinar organismos como hongos en el artículo estaba mal, aquí hay una variante de lo hehco anterior pero con la base de datos de referencia en el archivo RDP_LSU_fixed_train_set_v2.fa.gz . Para saber cómo se obtuvo, ver script de shell en Github.
+```{r}
+#esta función empieza con la asignación de la taxonomía a las secuencias dado el amplicon usado, igual usa una serie de secuencias de entrenamiento con taxonomía conocida para asignar correctamente las muestras usadas
+#taxa2 <- assignTaxonomy(seqtab.nochim,"~/R/Genomica_funcional/pro_fin_genfun/tax/RDP_LSU_fixed_train_set_v2.fa.gz", multithread=T)
+#para agilizar el proceso, se corrió el objeto y se guardó para posteiormente solo cargarse
+#save(taxa2,file="~/R/Genomica_funcional/pro_fin_genfun/taxa3.RData")
+load("taxa3.RData")
+```
+
+```{r}
+#esta parte es para asignar las especies a cada secuencia, pero se requiere cumplir con ciertos criterios para que pueda asignarse, para ver los parámetros que se deben de cumplir hay que checar la dacumentación
+#taxa2 <- addSpecies(taxa,"~/R/Genomica_funcional/pro_fin_genfun/tax/rdp_species_assignment_LSU_v2.fa.gz")
+#mismo proceso que el objeto anterior
+#save(taxa2,file="~/R/Genomica_funcional/pro_fin_genfun/taxa2.RData")
+load("taxa2.RData")
+```
+Para poder visualiar más concretamente la taxonomía que se ha asignado, se puede hacer lo siguiente.
+```{r}
+taxa.print2 <- taxa2 # asignamos nuestro taxa a un objeto llamado taxa.print para modificar
+rownames(taxa.print2) <- NULL #los nombres de los renglones eran las secuencias enteras, entonces se remueven
+head(taxa.print2,15)#now it says the taxonomy rather than the full sequence and the taxonomy
+```
+
+## Convertir a phyloseq
+En esta parte se convierten los objetos que creamos en phyloseq, van a tener diferente información de utilidad en diferentes procesos.
+```{r}
+#primero vamos a cargar las librerías que se requieren
+library(phyloseq)
+library(Biostrings)
+library(ggplot2)
+#esto simplemente es para el formato de los plots que van a crearse más adelante
+theme_set(theme_bw())
+#usaremos el data fram samdf de las bacterias
+```
+
+En este paso construimos nuesto objeto phyloseq con los datos que nos interesan.
+```{r}
+ps2 <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), #genera nuestro objeto phyloseq usando los datos que le damos a la tabla
+               sample_data(samdf), 
+               tax_table(taxa2))
+rr<-c("SRR9700969", "SRR9700912")
+ps2 <- prune_samples(sample_names(ps2) != rr, ps2) # Remover los controles negativos
 ```
 
 
+```{r}
+dna2 <- Biostrings::DNAStringSet(taxa_names(ps2))#toma las secuencias como los nombres de la taxa, luego toma esas secuencias para generarlos como dns strings 
+names(dna2) <- taxa_names(ps2)#los nombres de las secuencias
+ps2 <- merge_phyloseq(ps2, dna2)#une los objetos creados de phyloseq con las secuencias i 
+taxa_names(ps2) <- paste0("ASV", seq(ntaxa(ps2)))#asigna ASV y numera nada más, esos son los nombres ahora
+ps2
+plot_richness(ps2, x="Suelo", measures = c("Shannon","Simpson","InvSimpson"), color = "Humedad")
+plot_richness(ps2, x="Suelo", measures = c("Shannon","Simpson","InvSimpson"), color = "Replica")
+```
 
 
+## Gráficos de barras apiladas de abundancias
 
+```{r}
+top20.2 <- names(sort(taxa_sums(ps2), decreasing=TRUE))[1:194]
+ps.top20.2 <- transform_sample_counts(ps2, function(OTU) OTU/sum(OTU))
+ps.top20.2 <- prune_taxa(top20.2, ps.top20.2)
+plot_bar(ps.top20.2, x="Suelo", fill="Phylum") + facet_wrap(~Humedad, scales="free_x")
+plot_bar(ps.top20.2, x="Suelo", fill="Order") + facet_wrap(~Humedad, scales="free_x")
+plot_bar(ps.top20.2, x="Suelo", fill="Family") + facet_wrap(~Humedad, scales="free_x")
+```
+
+# Notas importantes
+En el artículo describen la extracción de muestras específicas de hongos usando la herramienta ITSx; sin embargo, esta no está diesñada para realizar dicho trabajo. Cuando se visitó el manual de esta herramienta, explícitamente mencionan que no se debe de hacer esto, pues no está diseñada para realizar la identificació. Por otro lado, el uso de la base de datos para hongos habida en el manual de la librería **dada2**, no fue lo suficientemente adecuada para dar una buena aproximación para la composición de las muestras, aunque cabe recalcar que los autores del artículo mencionan el uso de **Warcup** para la identificación taxonómica de los hongos. 
+A continuación se muestra la evidencia de los puntos expuestos,
+```{r}
+library(knitr)
+include_graphics("~/R/Genomica_funcional/pro_fin_genfun/error_1.png")
+include_graphics("~/R/Genomica_funcional/pro_fin_genfun/comunidades_art.jpg")
+```
