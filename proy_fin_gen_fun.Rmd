@@ -259,8 +259,7 @@ plot_bar(ps.top20.2, x="Suelo", fill="Family") + facet_wrap(~Humedad, scales="fr
 # Notas importantes
 En el artículo describen la extracción de muestras específicas de hongos usando la herramienta ITSx; sin embargo, esta no está diesñada para realizar dicho trabajo. Cuando se visitó el manual de esta herramienta, explícitamente mencionan que no se debe de hacer esto, pues no está diseñada para realizar la identificació. Por otro lado, el uso de la base de datos para hongos habida en el manual de la librería **dada2**, no fue lo suficientemente adecuada para dar una buena aproximación para la composición de las muestras, aunque cabe recalcar que los autores del artículo mencionan el uso de **Warcup** para la identificación taxonómica de los hongos. 
 A continuación se muestra la evidencia de los puntos expuestos,
-```{r}
-library(knitr)
-include_graphics("~/R/Genomica_funcional/pro_fin_genfun/error_1.png")
-include_graphics("~/R/Genomica_funcional/pro_fin_genfun/comunidades_art.jpg")
-```
+
+![Errores encontrados](~/R/Genomica_funcional/pro_fin_genfun/error_1.png)
+
+![Comunidades del artículo](~/R/Genomica_funcional/pro_fin_genfun/comunidades_art.jpg)
