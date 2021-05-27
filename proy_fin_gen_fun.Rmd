@@ -114,5 +114,94 @@ head(track)
 ```
 # Asignar taxonomía
 
-Para asignar las taxonomías se usan los archivos silva_nr_v132_train_set.fa.gz y RDP_LSU_fixed_train_set_v2.fa.gz
-Para la taxonomía de hongos, consultar repositorio de Github para ver cómo se obtuvo todo.
+Para asignar las taxonomías se usan los archivos habidos en silva_nr_v132_train_set.fa.gz . Esta base de datos para la identificación taxonómica se puede buscar en https://benjjneb.github.io/dada2/training.html para obtener la versión más reciente.
+```{r}
+#esta función empieza con la asignación de la taxonomía a las secuencias dado el amplicon usado, igual usa una serie de secuencias de entrenamiento con taxonomía conocida para asignar correctamente las muestras usadas
+#taxa <- assignTaxonomy(seqtab.nochim,"~/R/Genomica_funcional/pro_fin_genfun/tax/silva_nr_v132_train_set.fa.gz", multithread=T)
+#para agilizar el proceso, se corrió el objeto y se guardó para posteiormente solo cargarse
+#save(taxa,file="~/R/Genomica_funcional/pro_fin_genfun/taxa1.RData")
+load("taxa1.RData")
+```
+
+```{r}
+#esta parte es para asignar las especies a cada secuencia, pero se requiere cumplir con ciertos criterios para que pueda asignarse, para ver los parámetros que se deben de cumplir hay que checar la dacumentación
+#taxa <- addSpecies(taxa,"~/R/Genomica_funcional/pro_fin_genfun/tax/silva_species_assignment_v132.fa.gz")
+#mismo proceso que el objeto anterior
+#save(taxa,file="~/R/Genomica_funcional/pro_fin_genfun/taxa.RData")
+load("taxa.RData")
+```
+Para poder visualiar más concretamente la taxonomía que se ha asignado, se puede hacer lo siguiente.
+```{r}
+taxa.print <- taxa # asignamos nuestro taxa a un objeto llamado taxa.print para modificar
+rownames(taxa.print) <- NULL #los nombres de los renglones eran las secuencias enteras, entonces se remueven
+head(taxa.print)#now it says the taxonomy rather than the full sequence and the taxonomy
+```
+
+# Convertir a phyloseq
+En esta parte se convierten los objetos que creamos en phyloseq, van a tener diferente información de utilidad en diferentes procesos.
+```{r}
+#primero vamos a cargar las librerías que se requieren
+library(phyloseq)
+library(Biostrings)
+library(ggplot2)
+#esto simplemente es para el formato de los plots que van a crearse más adelante
+theme_set(theme_bw())
+```
+Construir un *data frame* a partir de la información que hay en los archivos.
+```{r}
+ll<-read.table("~/R/Genomica_funcional/pro_fin_genfun/Oredered_accessions.txt")#archivo con los nombres de los accesos ordenados de cada muestra
+samples.out <- ll[[1]] #nombres de los archivos filtrados y unidos en orden
+#todo lo de abajo es para armar el dataframe con el que nuestro objeto de phyloseq va a basarse
+suelo<-paste0(c(rep("LC",32),rep("LF",32),rep("LG",32),rep("SC",32),rep("SF",32),rep("SG",32), rep("neg",2)))
+replica<-as.character(paste0(c(rep(paste0(c(rep(1,4),rep(2,4),rep(3,4),rep(4,4))),12),rep("neg",2))))
+humedad<-paste0(c(rep(c(15,30,60,90),48),rep("neg",2)))
+samdf<-data.frame(Suelo=suelo,Humedad=humedad)
+samdf$Replica<-replica
+rownames(samdf) <- samples.out#just renames to the file names
+```
+En este paso construimos nuesto objeto phyloseq con los datos que nos interesan.
+```{r}
+ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), 
+               sample_data(samdf), 
+               tax_table(taxa))
+rr<-c("SRR9700969", "SRR9700912")
+ps <- prune_samples(sample_names(ps) != rr, ps) # Remover los controles negativos
+```
+
+
+```{r}
+dna <- Biostrings::DNAStringSet(taxa_names(ps))#will take the sequence as the taxa names, and then will take thos sequences as dna strings so we don't lose info
+names(dna) <- taxa_names(ps)#the names are the sequences
+ps <- merge_phyloseq(ps, dna)#i guess it will merge the objects we created into one with the all the information
+taxa_names(ps) <- paste0("ASV", seq(ntaxa(ps)))#assigned ASV and simply numbered, those are the new taxa names
+ps
+plot_richness(ps, x="Humedad")
+```
+
+
+
+
+```{r}
+# Transform data to proportions as appropriate for Bray-Curtis distances
+ps.prop <- transform_sample_counts(ps, function(otu) otu/sum(otu))#transforms the sample counts of a taxa abundance matrix according to a user-provided function
+ord.nmds.bray <- ordinate(ps.prop, method="NMDS", distance="bray")#Didn't really get it
+```
+
+```{r}
+plot_ordination(ps.prop, ord.nmds.bray, color="When", title="Bray NMDS")
+```
+
+
+# Gráficos de barras apiladas de abundancias
+
+```{r}
+top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
+ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
+ps.top20 <- prune_taxa(top20, ps.top20)
+plot_bar(ps.top20, x="Day", fill="Family") + facet_wrap(~When, scales="free_x")
+```
+
+
+
+
+
