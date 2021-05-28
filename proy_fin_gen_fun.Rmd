@@ -1,14 +1,26 @@
 ---
-title: "Proyecto final Genómica Funcional"
-author: "Gómez Hernández Jorge Luis, Rojas García Luis Andrés"
-date: "5/28/2021"
+title: "Proyecto final"
+subtitle: "Genómica Funcional"
+author: "Gómez Hernández Jorge Luis & Rojas García Luis Andrés"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
-  html_document: 
-    theme: cerulean
+    prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
 ---
 
+Primero se cargan todos los paquetes necesarios para este script
+```{r warning=F, message=F}
+library(dada2)
+library(phyloseq)
+library(Biostrings)
+library(ggplot2)
+library(igraph)
+library(RCy3)
+library(pheatmap)
+```
 
-Primero, señalamos el directorio de trabajo donde se va a llevar todo a cabo y cargamos la librería principal que se usará.
+Señalamos el directorio de trabajo donde se va a llevar todo a cabo y cargamos la librería principal que se usará.
 ```{r}
 setwd("~/R/Genomica_funcional/pro_fin_genfun/") #cambiar para PROPIO directorio de trabajo
 library(dada2)
@@ -263,3 +275,110 @@ A continuación se muestra la evidencia de los puntos expuestos,
 ![Errores encontrados](~/R/Genomica_funcional/pro_fin_genfun/error_1.png)
 
 ![Comunidades del artículo](~/R/Genomica_funcional/pro_fin_genfun/comunidades_art.jpg)
+
+# Red de Correlación 
+
+Se van a cargar los datos de correlación de las variables epidáficas con los phyla encontrados
+
+```{r}
+tabla <- read.csv("epidaficas_completo.csv", header = T)
+tabla
+```
+
+Se hace un subset de la base de datos para crear ambas redes separadas
+
+```{r warning=F, message=F}
+# Bacterias
+tabla_b <- subset(tabla, tabla$phyla_class == "Bacterial_archaeal")
+rownames(tabla_b) <- tabla_b[,2] #Se asginan los nombres de los renglones con los nombres de los phylum encontrados
+tabla_b <- tabla_b [,-c(1,2)] #Se eliminan los datos discretos para crear la matriz de correlación
+
+# Hongos
+tabla_h <- subset(tabla, tabla$phyla_class == "Fungal_class")
+rownames(tabla_h) <- tabla_h[,2] #Se asginan los nombres de los renglones con los nombres de los phylum encontrados
+tabla_h <- tabla_h [,-c(1,2)] #Se eliminan los datos discretos para crear la matriz de correlación
+```
+
+Se construye la matriz de correlación
+
+```{r warning=F, message=F}
+# Bacterias
+cepi_b <- cor(t(tabla_b)) # se transpone la matriz para poder tener la correlación entre los phylum y se guarda en un objeto
+cepi_b <- as.matrix(cepi_b) # se cambia la clase del objeto a matriz
+nepi_b <- (cepi_b + 1)/2 # Se hace la suma de una unidad a cada valor de la matriz y se divide entre dos para tener valores entre 0 y 1.
+diag(nepi_b) <- rep(0, length( diag(nepi_b))) # Se cambian todos los valores de la diagonal por cero para evitar autoconexiones entre nodos
+pheatmap(nepi_b) # Se puede observar la correlación de la matriz creada con un heatmap
+
+# Hongos
+cepi_h <- cor(t(tabla_h)) # se transpone la matriz para poder tener la correlación entre los phylum y se guarda en un objeto
+cepi_h <- as.matrix(cepi_h) # se cambia la clase del objeto a matriz
+nepi_h <- (cepi_h + 1)/2 # Se hace la suma de una unidad a cada valor de la matriz y se divide entre dos para tener valores entre 0 y 1.
+diag(nepi_h) <- rep(0, length( diag(nepi_h))) # Se cambian todos los valores de la diagonal por cero para evitar autoconexiones entre nodos
+pheatmap(nepi_h) # Se puede observar la correlación de la matriz creada con un heatmap
+```
+
+Se construyen las redes con el paquete igraph, se especifica que no son dirigidas y que son redes pesadas.
+
+```{r warning=F, message=F}
+# Bacterias
+gepi2_b <- graph_from_adjacency_matrix(nepi_b,  mode = "undirected", weighted = T )
+is_weighted(gepi2_b) # Se comprueba que la red es pesada usando la función is_weighted. Arroja el valor de TRUE cuando la red es pesada
+plot(gepi2_b, vertex.size = 10, edge.arrow.size = 0.25, 
+     edge.arrow.width = 2.5, edge.color = "blue", vertex.label.color ="red2", 
+     vertex.label.cex = 0.9) 
+
+# Hongos
+gepi2_h <- graph_from_adjacency_matrix(nepi_h,  mode = "undirected",
+                                     weighted = T )
+is_weighted(gepi2_h) # Se comprueba que la red es pesada usando la función is_weighted. Arroja el valor de TRUE cuando la red es pesada
+plot(gepi2_h, vertex.size = 10, edge.arrow.size = 0.25, 
+     edge.arrow.width = 2.5, edge.color = "blue", vertex.label.color ="red2", 
+     vertex.label.cex = 0.9)
+```
+
+Se clusteriza la red por distintos métodos para observar cómo se agrupan los phyla de acuerdo a la correlación que tienen entre estos con base en los factores epidáficos que los afectan.
+
+```{r warning=F, message=F}
+# Bacterias
+gepi2c_b1 <- cluster_infomap(gepi2_b) # Método infomap
+plot(gepi2c_b1, gepi2_b, vertex.size = 10, edge.arrow.size = 0.25, 
+     edge.arrow.width = 2.5, edge.color = "blue", vertex.label.color ="red2", 
+     vertex.label.cex = 0.9)
+gepi2c_b2 <- cluster_fast_greedy(gepi2_b) # Método edge betweenness
+plot(gepi2c_b2, gepi2_b, vertex.size = 10, edge.arrow.size = 0.25, 
+     edge.arrow.width = 2.5, edge.color = "blue", vertex.label.color ="red2", 
+     vertex.label.cex = 0.9)
+gepi2c_b3 <- cluster_spinglass(gepi2_b) # Método spinglass
+plot(gepi2c_b3, gepi2_b, vertex.size = 10, edge.arrow.size = 0.25, 
+     edge.arrow.width = 2.5, edge.color = "blue", vertex.label.color ="red2", 
+     vertex.label.cex = 0.9)
+
+# Hongos
+gepi2c_h1 <- cluster_infomap(gepi2_h) # Método infomap
+plot(gepi2c_h1, gepi2_h, vertex.size = 10, edge.arrow.size = 0.25, 
+     edge.arrow.width = 2.5, edge.color = "blue", vertex.label.color ="red2", 
+     vertex.label.cex = 0.9)
+gepi2c_h2 <- cluster_fast_greedy(gepi2_h) # Método edge betweenness
+plot(gepi2c_h2, gepi2_h, vertex.size = 10, edge.arrow.size = 0.25, 
+     edge.arrow.width = 2.5, edge.color = "blue", vertex.label.color ="red2", 
+     vertex.label.cex = 0.9)
+gepi2c_h3 <- cluster_spinglass(gepi2_h) # Método spinglass
+plot(gepi2c_h3, gepi2_h, vertex.size = 10, edge.arrow.size = 0.25, 
+     edge.arrow.width = 2.5, edge.color = "blue", vertex.label.color ="red2", 
+     vertex.label.cex = 0.9)
+```
+
+Se exporta la red a Cytoscape para observar con mejor detalle.
+
+```{r warning=FALSE, message=FALSE, out.width='100%', fig.align='center'}
+# Bacterias
+#createNetworkFromIgraph(gepi2_b, "Bacterioma") # Con esta función se abre Cytoscape
+
+# Hongos
+# createNetworkFromIgraph(gepi2_h, "Network Hongos"))
+
+```
+
+![Red de Bacterias](bacterias_red.jpg)
+![Red de Hongos](hongos_red.jpg)
+
