@@ -278,7 +278,8 @@ A continuación se muestra la evidencia de los puntos expuestos,
 
 # Red de Correlación 
 
-Se van a cargar los datos de correlación de las variables epidáficas con los phyla encontrados
+Se van a cargar los datos de correlación de las variables epidáficas con los phyla encontrados. Los datos se obtuvieron de <https://ars.els-cdn.com/content/image/1-s2.0-S0038071719301762-mmc1.xlsx> subidos por los autores del artículo. Se trabajó con la tabla 8 que contiene la correlación de Spearman entre las abundancias encontradas tanto de bacterias como de hongos, y las variables epidáficas
+
 
 ```{r}
 tabla <- read.csv("epidaficas_completo.csv", header = T)
