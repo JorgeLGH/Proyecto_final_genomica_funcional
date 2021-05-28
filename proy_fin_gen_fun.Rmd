@@ -23,7 +23,6 @@ library(pheatmap)
 Señalamos el directorio de trabajo donde se va a llevar todo a cabo y cargamos la librería principal que se usará.
 ```{r}
 setwd("~/R/Genomica_funcional/pro_fin_genfun/") #cambiar para PROPIO directorio de trabajo
-library(dada2)
 ```
 Ahora se define la ruta en la cual están los archivos FASTQ que se usarán
 ```{r}
@@ -152,10 +151,6 @@ head(taxa.print)#now it says the taxonomy rather than the full sequence and the 
 # Convertir a phyloseq
 En esta parte se convierten los objetos que creamos en phyloseq, van a tener diferente información de utilidad en diferentes procesos.
 ```{r}
-#primero vamos a cargar las librerías que se requieren
-library(phyloseq)
-library(Biostrings)
-library(ggplot2)
 #esto simplemente es para el formato de los plots que van a crearse más adelante
 theme_set(theme_bw())
 ```
@@ -227,10 +222,6 @@ head(taxa.print2,15)#now it says the taxonomy rather than the full sequence and 
 ## Convertir a phyloseq
 En esta parte se convierten los objetos que creamos en phyloseq, van a tener diferente información de utilidad en diferentes procesos.
 ```{r}
-#primero vamos a cargar las librerías que se requieren
-library(phyloseq)
-library(Biostrings)
-library(ggplot2)
 #esto simplemente es para el formato de los plots que van a crearse más adelante
 theme_set(theme_bw())
 #usaremos el data fram samdf de las bacterias
