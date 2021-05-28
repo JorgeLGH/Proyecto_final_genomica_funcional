@@ -1,5 +1,6 @@
 # Proyecto final de Genómica Funcional
-Este repositorio incluye los archivos FASTQ, el script de bash y cualquier otro archivo que se haya usado para la realización del proyecto final de la materia de Genómica Funcional 2021. 
+Este repositorio incluye los archivos FASTQ, el script de bash y cualquier otro archivo que se haya usado para la realización del proyecto final de la materia de Genómica Funcional 2021. Basado  en: Zheng, Q., Hu, Y., Zhang, S., Noll, L., Böckle, T., Dietrich, M., Herbold, C. W., Eichorst, S. A., Woebken, D., Richter, A., & Wanek, W. (2019). Soil multifunctionality is affected by the soil environment and by microbial community composition and diversity. Soil Biology and Biochemistry, 136, 107521. <https://doi.org/10.1016/j.soilbio.2019.107521>
+
 ## Contenido
 
 1. Archivos requeridos: una liga de google drive que tiene los archivos FASTQ, bash, etc, del proyecto en cuestión.
